@@ -1,47 +1,66 @@
-import random
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Roleta de Duplas</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+        button { padding: 10px 20px; font-size: 16px; margin: 10px; }
+        #resultado { margin-top: 20px; white-space: pre-line; }
+    </style>
+</head>
+<body>
+    <h1>Roleta de Duplas para Prova</h1>
+    <p>Clique em "Sortear Duplas" para gerar as duplas.</p>
+    <button onclick="sortearDuplas()">Sortear Duplas</button>
+    <div id="resultado"></div>
 
-# Lista de todos os alunos (baseada na sua lista original)
-alunos = [
-    "ANA CAROLINA FONSECA", "ANA CAROLINA RAIA PIROZZI", "ANA CLARA DE PAULO NOGUEIRA", "ANA LAURA BRANDÃO DE ANDRADE",
-    "CAIO ROMANINI PEREIRA", "CALIEL HENRIQUE SOARES MARIANO", "DAVID EMANUEL COSTA", "ELOÁ MIRELA NOGUEIRA DE OLIVEIRA",
-    "FILIPE GARCIA", "ERICK LOPES BELLINATO", "FRANCISCO CUNHA NETO", "GABRIEL DA SILVA FRANCISQUIN",
-    "JHENIFER MARIA FRANCISCO DE OLIVEIRA", "JOAO AUGUSTO PAULIUKEVICIUS DA PALMA", "JOÃO PEDRO NARDONI DARIVA",
-    "JOÃO VÍTOR ISSE DE ARAUJO", "KAWANI VITORIA PINTO HERNANDES", "LORENA GALLINARI GARCIA", "LORENA MILANI DOS SANTOS",
-    "MARCOS WILLIAN APARECIDO SOARES DA PALMA", "MARIA EDUARDA LUCIEN SANTOS", "MARISSOL OHANNA CARDOSO",
-    "MATHEUS SOARES DE OLIVEIRA", "MIGUEL GOMES MOLINA", "MIKAELLY MACHADO DE SOUZA", "PEDRO PAULO SÉRGIO NUNES PETRÉCA",
-    "PEDRO GABRIEL ROCHA", "PEDRO HENRIQUE MOREIRA MUNHOZ", "REBECCA GONCALVES UGUCIONI", "RUAN FELIPPI GERMANO DE SOUZA",
-    "SOPHIA PORTE CAMPOS", "TAINARA OLIVEIRA DE FRANÇA", "VICTOR GABRIEL ANDRADE DA SILV", "YASMIN DE NEGRI",
-    "KELVYN JUNIOR APARECIDO RAMOS", "LUIS CARLOS DUTRA DE RESENDE JUNIOR", "KAROLINE BORGES GANDRA",
-    "JOAO PAULO SILVA INACIO", "ANDRÉ LUIZ XAVIER DE LIMA", "ALVARO SCOPARO NETO"
-]
+    <script>
+        // Lista de alunos
+        const alunos = [
+            "ANA CAROLINA FONSECA", "ANA CAROLINA RAIA PIROZZI", "ANA CLARA DE PAULO NOGUEIRA", "ANA LAURA BRANDÃO DE ANDRADE",
+            "CAIO ROMANINI PEREIRA", "CALIEL HENRIQUE SOARES MARIANO", "DAVID EMANUEL COSTA", "ELOÁ MIRELA NOGUEIRA DE OLIVEIRA",
+            "FILIPE GARCIA", "ERICK LOPES BELLINATO", "FRANCISCO CUNHA NETO", "GABRIEL DA SILVA FRANCISQUIN",
+            "JHENIFER MARIA FRANCISCO DE OLIVEIRA", "JOAO AUGUSTO PAULIUKEVICIUS DA PALMA", "JOÃO PEDRO NARDONI DARIVA",
+            "JOÃO VÍTOR ISSE DE ARAUJO", "KAWANI VITORIA PINTO HERNANDES", "LORENA GALLINARI GARCIA", "LORENA MILANI DOS SANTOS",
+            "MARCOS WILLIAN APARECIDO SOARES DA PALMA", "MARIA EDUARDA LUCIEN SANTOS", "MARISSOL OHANNA CARDOSO",
+            "MATHEUS SOARES DE OLIVEIRA", "MIGUEL GOMES MOLINA", "MIKAELLY MACHADO DE SOUZA", "PEDRO PAULO SÉRGIO NUNES PETRÉCA",
+            "PEDRO GABRIEL ROCHA", "PEDRO HENRIQUE MOREIRA MUNHOZ", "REBECCA GONCALVES UGUCIONI", "RUAN FELIPPI GERMANO DE SOUZA",
+            "SOPHIA PORTE CAMPOS", "TAINARA OLIVEIRA DE FRANÇA", "VICTOR GABRIEL ANDRADE DA SILV", "YASMIN DE NEGRI",
+            "KELVYN JUNIOR APARECIDO RAMOS", "LUIS CARLOS DUTRA DE RESENDE JUNIOR", "KAROLINE BORGES GANDRA",
+            "JOAO PAULO SILVA INACIO", "ANDRÉ LUIZ XAVIER DE LIMA", "ALVARO SCOPARO NETO"
+        ];
 
-# Duplas fixas (mantidas como você definiu)
-duplas_fixas = [
-    ["ANA CAROLINA RAIA PIROZZI", "CAIO ROMANINI PEREIRA"],
-    ["MATHEUS SOARES DE OLIVEIRA", "YASMIN DE NEGRI"],
-    ["JHENIFER MARIA FRANCISCO DE OLIVEIRA", "SOPHIA PORTE CAMPOS"]
-]
+        // Duplas fixas
+        const duplasFixas = [
+            ["ANA CAROLINA RAIA PIROZZI", "CAIO ROMANINI PEREIRA"],
+            ["MATHEUS SOARES DE OLIVEIRA", "YASMIN DE NEGRI"],
+            ["JHENIFER MARIA FRANCISCO DE OLIVEIRA", "SOPHIA PORTE CAMPOS"]
+        ];
 
-# Função para gerar as duplas (com sorteio aleatório para os restantes)
-def gerar_duplas(alunos, duplas_fixas):
-    # Remover alunos das duplas fixas da lista geral
-    alunos_restantes = [a for a in alunos if not any(a in dupla for dupla in duplas_fixas)]
-    
-    # Embaralhar os restantes
-    random.shuffle(alunos_restantes)
-    
-    # Parear os restantes dois a dois
-    duplas_sorteadas = []
-    for i in range(0, len(alunos_restantes), 2):
-        duplas_sorteadas.append([alunos_restantes[i], alunos_restantes[i+1]])
-    
-    # Combinar duplas fixas com as sorteadas
-    todas_duplas = duplas_fixas + duplas_sorteadas
-    
-    return todas_duplas
-
-# Executar e imprimir o resultado (este é o sorteio recém-gerado)
-duplas_finais = gerar_duplas(alunos, duplas_fixas)
-print("Duplas sorteadas:")
-for i, dupla in enumerate(duplas_finais, 1):
-    print(f"Dupla {i}: {dupla}")
+        function sortearDuplas() {
+            // Copiar lista de alunos
+            let alunosRestantes = alunos.filter(a => !duplasFixas.flat().includes(a));
+            
+            // Embaralhar
+            alunosRestantes.sort(() => Math.random() - 0.5);
+            
+            // Parear
+            let duplasSorteadas = [];
+            for (let i = 0; i < alunosRestantes.length; i += 2) {
+                duplasSorteadas.push([alunosRestantes[i], alunosRestantes[i + 1]]);
+            }
+            
+            // Combinar
+            let todasDuplas = duplasFixas.concat(duplasSorteadas);
+            
+            // Exibir
+            let resultado = "Duplas sorteadas:\n";
+            todasDuplas.forEach((dupla, index) => {
+                resultado += `Dupla ${index + 1}: ${dupla.join(' e ')}\n`;
+            });
+            document.getElementById('resultado').textContent = resultado;
+        }
+    </script>
+</body>
+</html>
