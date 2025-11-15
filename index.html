@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Roleta de Alunos</title>
+<style>
+  body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+  #wheelCanvas { border: 4px solid #000; border-radius: 50%; }
+  #spinBtn { padding: 10px 20px; font-size: 18px; margin-top: 20px; cursor: pointer; }
+</style>
+</head>
+<body>
+<h1>Roleta de Alunos</h1>
+<p>Adicione os nomes separados por vírgula:</p>
+<textarea id="namesInput" rows="4" cols="40">Aluno 1, Aluno 2, Aluno 3, Aluno 4</textarea><br>
+<button onclick="generateWheel()">Gerar Roleta</button>
+<br><br>
+<canvas id="wheelCanvas" width="400" height="400"></canvas>
+<br>
+<button id="spinBtn" onclick="spinWheel()">Girar</button>
+
+<script>
+let names = [];
+let startAngle = 0;
+let arc = 0;
+let spinTimeout = null;
+let spinAngleStart = 0;
+let spinTime = 0;
+let spinTimeTotal = 0;
+
+function generateWheel() {
+  const input = document.getElementById('namesInput').value;
+  names = input.split(',').map(n => n.trim()).filter(n => n);
+  arc = Math.PI * 2 / names.length;
+  drawWheel();
+}
+
+function drawWheel() {
+  const canvas = document.getElementById("wheelCanvas");
+  const ctx = canvas.getContext("2d");
+  const outsideRadius = 180;
+  ctx.clearRect(0,0,400,400);
+
+  for(let i = 0; i < names.length; i++){
+    const angle = startAngle + i * arc;
+    ctx.beginPath();
+    ctx.fillStyle = i % 2 == 0 ? "#ffd54f" : "#4fc3f7";
+    ctx.moveTo(200,200);
+    ctx.arc(200,200,outsideRadius,angle,angle+arc);
+    ctx.fill();
+    ctx.save();
+    ctx.translate(200,200);
+    ctx.rotate(angle + arc/2);
+    ctx.fillStyle = "#000";
+    ctx.fillText(names[i], 80, 10);
+    ctx.restore();
+  }
+}
+
+function spinWheel() {
+  spinAngleStart = Math.random() * 10 + 10;
+  spinTime = 0;
+  spinTimeTotal = Math.random() * 3000 + 4000;
+  rotateWheel();
+}
+
+function rotateWheel() {
+  spinTime += 30;
+  if(spinTime >= spinTimeTotal){ stopRotateWheel(); return; }
+  const spinAngle = spinAngleStart - easeOut(spinTime, 0, spinAngleStart, spinTimeTotal);
+  startAngle += (spinAngle * Math.PI / 180);
+  drawWheel();
+  spinTimeout = setTimeout(rotateWheel, 30);
+}
+
+function stopRotateWheel(){
+  clearTimeout(spinTimeout);
+  const degrees = startAngle * 180 / Math.PI + 90;
+  const index = Math.floor((360 - degrees % 360) / (360 / names.length));
+  alert("Sorteado: " + names[index]);
+}
+
+function easeOut(t, b, c, d) { return c * (Math.sin(t/d * (Math.PI/2))) + b; }
+
+// Pairs fixed
+const fixedPairs = {
+  "ANA CAROLINA RAIA PIROZZI": "CAIO ROMANINI",
+  "MATHEUS SOARES DE OLIVEIRA": "YASMIN DE NEGRI",
+  "JHENIFER MARIA FRANCISCO DE OLIVEIRA": "SOPHIA PORTE CAMPOS"
+};
+
+function stopRotateWheel(){
+  clearTimeout(spinTimeout);
+  const degrees = startAngle * 180 / Math.PI + 90;
+  const index = Math.floor((360 - degrees % 360) / (360 / names.length));
+  const selected = names[index];
+  let message = "Sorteado: " + selected;
+
+  if(fixedPairs[selected]){
+    message += "
+Dupla fixa: " + fixedPairs[selected];
+  }
+
+  alert(message);
+
+  // Remove selected from list
+  names.splice(index, 1);
+  if(names.length > 0){
+    arc = Math.PI * 2 / names.length;
+    drawWheel();
+  } else {
+    alert("Todos os alunos já foram sorteados!");
+  }
+}
+</script>
+</body>
+</html>
