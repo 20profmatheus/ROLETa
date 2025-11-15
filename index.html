@@ -1,330 +1,47 @@
-<!doctype html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Roleta de Alunos</title>
-<style>
-  :root{ --bg:#ffffff; --accent:#0b6; --muted:#666; --canvas-size:520px; }
-  body{ font-family: "Arial",sans-serif; background:var(--bg); color:#111; margin:0; padding:18px; display:flex; flex-direction:column; align-items:center; gap:12px; }
-  h1{ margin:0; font-size:28px; text-align:center; }
-  .controls{ display:flex; flex-direction:column; gap:8px; align-items:center; width:100%; max-width:980px; }
-  textarea{ width:100%; min-height:80px; padding:8px; font-size:13px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; }
-  #buttons{ display:flex; gap:10px; align-items:center; }
-  button{ padding:10px 16px; font-size:15px; border-radius:8px; border:1px solid #333; cursor:pointer; background:#fff; }
-  #spinBtn{ background:#ffdd57; border-color:#c99b00; font-weight:700; }
-  #generateBtn{ background:#d4f1d4; border-color:#2e8b3a; }
-  #status{ color:var(--muted); font-size:14px; }
-  #wheelWrap{ width:var(--canvas-size); height:var(--canvas-size); display:flex; align-items:center; justify-content:center; position:relative; }
-  canvas{ width:100%; height:100%; border-radius:50%; box-shadow:0 8px 20px rgba(0,0,0,0.15); background:#fff; }
-  /* pointer on top */
-  .pointer{
-    position:absolute; top:-10px; left:50%; transform:translateX(-50%); width:0; height:0;
-    border-left:14px solid transparent; border-right:14px solid transparent; border-bottom:22px solid #e53935;
-    filter:drop-shadow(0 2px 3px rgba(0,0,0,0.2));
-  }
-  @media(max-width:700px){
-    :root{ --canvas-size:360px; }
-    h1{ font-size:20px; }
-  }
-</style>
-</head>
-<body>
-  <h1>Roleta de Alunos</h1>
+import random
 
-  <div class="controls">
-    <div style="width:100%; max-width:980px;">
-      <label for="namesInput">Nomes (separados por vírgula). Você pode editar aqui se quiser:</label>
-      <textarea id="namesInput"></textarea>
-    </div>
+# Lista de todos os alunos (baseada na sua lista original)
+alunos = [
+    "ANA CAROLINA FONSECA", "ANA CAROLINA RAIA PIROZZI", "ANA CLARA DE PAULO NOGUEIRA", "ANA LAURA BRANDÃO DE ANDRADE",
+    "CAIO ROMANINI PEREIRA", "CALIEL HENRIQUE SOARES MARIANO", "DAVID EMANUEL COSTA", "ELOÁ MIRELA NOGUEIRA DE OLIVEIRA",
+    "FILIPE GARCIA", "ERICK LOPES BELLINATO", "FRANCISCO CUNHA NETO", "GABRIEL DA SILVA FRANCISQUIN",
+    "JHENIFER MARIA FRANCISCO DE OLIVEIRA", "JOAO AUGUSTO PAULIUKEVICIUS DA PALMA", "JOÃO PEDRO NARDONI DARIVA",
+    "JOÃO VÍTOR ISSE DE ARAUJO", "KAWANI VITORIA PINTO HERNANDES", "LORENA GALLINARI GARCIA", "LORENA MILANI DOS SANTOS",
+    "MARCOS WILLIAN APARECIDO SOARES DA PALMA", "MARIA EDUARDA LUCIEN SANTOS", "MARISSOL OHANNA CARDOSO",
+    "MATHEUS SOARES DE OLIVEIRA", "MIGUEL GOMES MOLINA", "MIKAELLY MACHADO DE SOUZA", "PEDRO PAULO SÉRGIO NUNES PETRÉCA",
+    "PEDRO GABRIEL ROCHA", "PEDRO HENRIQUE MOREIRA MUNHOZ", "REBECCA GONCALVES UGUCIONI", "RUAN FELIPPI GERMANO DE SOUZA",
+    "SOPHIA PORTE CAMPOS", "TAINARA OLIVEIRA DE FRANÇA", "VICTOR GABRIEL ANDRADE DA SILV", "YASMIN DE NEGRI",
+    "KELVYN JUNIOR APARECIDO RAMOS", "LUIS CARLOS DUTRA DE RESENDE JUNIOR", "KAROLINE BORGES GANDRA",
+    "JOAO PAULO SILVA INACIO", "ANDRÉ LUIZ XAVIER DE LIMA", "ALVARO SCOPARO NETO"
+]
 
-    <div id="buttons">
-      <button id="generateBtn">Gerar Roleta</button>
-      <button id="spinBtn">Girar</button>
-      <button id="resetBtn">Reiniciar Lista</button>
-      <div id="status">Pronto.</div>
-    </div>
-  </div>
+# Duplas fixas (mantidas como você definiu)
+duplas_fixas = [
+    ["ANA CAROLINA RAIA PIROZZI", "CAIO ROMANINI PEREIRA"],
+    ["MATHEUS SOARES DE OLIVEIRA", "YASMIN DE NEGRI"],
+    ["JHENIFER MARIA FRANCISCO DE OLIVEIRA", "SOPHIA PORTE CAMPOS"]
+]
 
-  <div id="wheelWrap">
-    <div class="pointer" title="Indicador"></div>
-    <canvas id="wheelCanvas" width="800" height="800"></canvas>
-  </div>
+# Função para gerar as duplas (com sorteio aleatório para os restantes)
+def gerar_duplas(alunos, duplas_fixas):
+    # Remover alunos das duplas fixas da lista geral
+    alunos_restantes = [a for a in alunos if not any(a in dupla for dupla in duplas_fixas)]
+    
+    # Embaralhar os restantes
+    random.shuffle(alunos_restantes)
+    
+    # Parear os restantes dois a dois
+    duplas_sorteadas = []
+    for i in range(0, len(alunos_restantes), 2):
+        duplas_sorteadas.append([alunos_restantes[i], alunos_restantes[i+1]])
+    
+    # Combinar duplas fixas com as sorteadas
+    todas_duplas = duplas_fixas + duplas_sorteadas
+    
+    return todas_duplas
 
-<script>
-/* === DADOS PRE-CARREGADOS ===
-   Aqui todo o roster foi colocado automaticamente.
-   Se quiser editar, faça direto na textarea.
-*/
-const defaultNames = [
-"ANA CAROLINA FONSECA",
-"ANA CAROLINA RAIA PIROZZI",
-"ANA CLARA DE PAULO NOGUEIRA",
-"ANA LAURA BRANDÃO DE ANDRADE",
-"CAIO ROMANINI PEREIRA",
-"CALIEL HENRIQUE SOARES MARIANO",
-"DAVID EMANUEL COSTA",
-"ELOÁ MIRELA NOGUEIRA DE OLIVEIRA",
-"FILIPE GARCIA",
-"ERICK LOPES BELLINATO",
-"FRANCISCO CUNHA NETO",
-"GABRIEL DA SILVA FRANCISQUIN",
-"JHENIFER MARIA FRANCISCO DE OLIVEIRA",
-"JOAO AUGUSTO PAULIUKEVICIUS DA PALMA",
-"JOÃO PEDRO NARDONI DARIVA",
-"JOÃO VÍTOR ISSE DE ARAUJO",
-"KAWANI VITORIA PINTO HERNANDES",
-"LORENA GALLINARI GARCIA",
-"LORENA MILANI DOS SANTOS",
-"MARCOS WILLIAN APARECIDO SOARES DA PALMA",
-"MARIA EDUARDA LUCIEN SANTOS",
-"MARISSOL OHANNA CARDOSO",
-"MATHEUS SOARES DE OLIVEIRA",
-"MIGUEL GOMES MOLINA",
-"MIKAELLY MACHADO DE SOUZA PEDRO",
-"PAULO SÉRGIO NUNES PETRÉCA",
-"PEDRO GABRIEL ROCHA",
-"PEDRO HENRIQUE MOREIRA MUNHOZ",
-"REBECCA GONCALVES UGUCIONI",
-"RUAN FELIPPI GERMANO DE SOUZA",
-"SOPHIA PORTE CAMPOS",
-"TAINARA OLIVEIRA DE FRANÇA",
-"VICTOR GABRIEL ANDRADE DA SILV",
-"YASMIN DE NEGRI",
-"KELVYN JUNIOR APARECIDO RAMOS",
-"LUIS CARLOS DUTRA DE RESENDE JUNIOR",
-"KAROLINE BORGES GANDRA",
-"JOAO PAULO SILVA INACIO",
-"ANDRÉ LUIZ XAVIER DE LIMA",
-"ALVARO SCOPARO NETO"
-];
-
-/* === PARES FIXOS (usar nomes exatamente como aparecem na lista) ===
-   Quando sair o primeiro, o segundo será mostrado como dupla fixa
-   e AMBOS serão removidos da roleta.
-*/
-const fixedPairs = {
-  "ANA CAROLINA RAIA PIROZZI": "CAIO ROMANINI PEREIRA",
-  "MATHEUS SOARES DE OLIVEIRA": "YASMIN DE NEGRI",
-  "JHENIFER MARIA FRANCISCO DE OLIVEIRA": "SOPHIA PORTE CAMPOS"
-};
-
-/* --- Estado da roleta --- */
-let names = [];           // lista mutável
-let backupNames = [];     // backup para reset
-let startAngle = 0;       // ângulo atual (radianos)
-let arc = 0;              // arco por fatia
-let canvas, ctx;
-let spinAnimating = false;
-let spinVelocity = 0;
-let spinFriction = 0.995;
-let lastTimestamp = 0;
-
-/* Cores repetidas agradáveis */
-const colors = ["#ffd54f","#4fc3f7","#a5d6a7","#ef9a9a","#ce93d8","#ffe082","#b2ebf2","#c5e1a5","#ffccbc","#d7ccc8"];
-
-function initDOM(){
-  canvas = document.getElementById("wheelCanvas");
-  ctx = canvas.getContext("2d");
-  document.getElementById("namesInput").value = defaultNames.join(", ");
-  document.getElementById("generateBtn").addEventListener("click", generateWheel);
-  document.getElementById("spinBtn").addEventListener("click", spinWheel);
-  document.getElementById("resetBtn").addEventListener("click", resetList);
-  // gerar automaticamente em 600ms (apenas para conveniência)
-  setTimeout(()=>{ generateWheel(); }, 600);
-  drawWheel(); // desenha vazio inicialmente
-}
-
-/* Gera/atualiza a lista a partir do textarea */
-function generateWheel(){
-  const raw = document.getElementById("namesInput").value;
-  names = raw.split(",").map(s => s.trim()).filter(s => s.length>0);
-  // normaliza espaços e maiúsculas (mantemos o texto como está)
-  backupNames = names.slice();
-  if(names.length === 0){
-    document.getElementById("status").textContent = "Insira pelo menos um nome.";
-    return;
-  }
-  arc = Math.PI*2 / names.length;
-  startAngle = 0;
-  drawWheel();
-  document.getElementById("status").textContent = `Roleta pronta com ${names.length} nomes.`;
-}
-
-/* Redesenha a roleta atual */
-function drawWheel(){
-  if(!ctx) return;
-  const width = canvas.width;
-  const height = canvas.height;
-  const cx = width/2, cy = height/2;
-  const radius = Math.min(width, height)/2 - 12;
-  ctx.clearRect(0,0,width,height);
-
-  if(names.length === 0){
-    // círculo vazio
-    ctx.beginPath();
-    ctx.arc(cx,cy,radius,0,2*Math.PI);
-    ctx.fillStyle="#fafafa";
-    ctx.fill();
-    ctx.strokeStyle="#ddd";
-    ctx.lineWidth=6; ctx.stroke();
-    ctx.fillStyle="#777"; ctx.font="18px Arial";
-    ctx.textAlign="center"; ctx.fillText("Nenhum nome", cx, cy);
-    return;
-  }
-
-  // desenha fatias
-  ctx.lineWidth = 2;
-  for(let i=0;i<names.length;i++){
-    const angle = startAngle + i*arc;
-    ctx.beginPath();
-    ctx.moveTo(cx,cy);
-    ctx.arc(cx,cy,radius, angle, angle+arc);
-    ctx.closePath();
-    ctx.fillStyle = colors[i % colors.length];
-    ctx.fill();
-    ctx.strokeStyle = "#fff";
-    ctx.stroke();
-
-    // texto no meio da fatia
-    ctx.save();
-    ctx.translate(cx,cy);
-    ctx.rotate(angle + arc/2);
-    // colocar o texto em linhas se muito longo
-    const label = names[i];
-    const maxWidth = radius * 0.6; // largura máxima
-    wrapText(ctx, label, radius*0.25, 0, maxWidth, 16);
-    ctx.restore();
-  }
-
-  // circulo central
-  ctx.beginPath();
-  ctx.arc(cx,cy,radius*0.22,0,2*Math.PI);
-  ctx.fillStyle="#ffffff";
-  ctx.fill();
-  ctx.strokeStyle="#bbb"; ctx.stroke();
-}
-
-/* Função para quebrar texto em linhas e desenhar (não altera ctx.font) */
-function wrapText(ctxLocal, text, x, y, maxWidth, lineHeight){
-  ctxLocal.fillStyle = "#111";
-  ctxLocal.font = "bold 13px Arial";
-  ctxLocal.textAlign = "center";
-  // quebra simples por palavras
-  const words = text.split(" ");
-  let line = "";
-  const lines = [];
-  for(let n=0;n<words.length;n++){
-    const testLine = line + (line ? " " : "") + words[n];
-    const metrics = ctxLocal.measureText(testLine);
-    if(metrics.width > maxWidth && line){
-      lines.push(line);
-      line = words[n];
-    } else {
-      line = testLine;
-    }
-  }
-  if(line) lines.push(line);
-  // centra verticalmente em relação ao fatia (desenha em x,y onde y=0)
-  const totalHeight = lines.length * lineHeight;
-  let startY = y - totalHeight/2 + lineHeight/2;
-  for(let i=0;i<lines.length;i++){
-    ctxLocal.fillText(lines[i], x, startY + i*lineHeight);
-  }
-}
-
-/* Gira a roleta */
-function spinWheel(){
-  if(spinAnimating) return; // evita duplo clique
-  if(names.length === 0){
-    alert("Não há nomes para sortear.");
-    return;
-  }
-  // inicia velocidade aleatória
-  spinVelocity = (Math.random() * 18 + 5); // deg/frame approx (rads we'll convert)
-  spinAnimating = true;
-  lastTimestamp = null;
-  document.getElementById("status").textContent = "Girando...";
-  requestAnimationFrame(stepSpin);
-}
-
-/* animação do giro */
-function stepSpin(ts){
-  if(!lastTimestamp) lastTimestamp = ts;
-  const elapsed = ts - lastTimestamp;
-  lastTimestamp = ts;
-
-  // converte a "velocidade" para radianos por frame (usamos elapsed para suavizar)
-  const delta = spinVelocity * (Math.PI/180) * (elapsed / 16.666);
-  startAngle += delta;
-  // reduzir velocidade
-  spinVelocity *= Math.pow(spinFriction, elapsed / 16.666);
-
-  drawWheel();
-
-  // condição de parada
-  if(spinVelocity < 0.02){
-    spinAnimating = false;
-    finalizeSpin();
-    return;
-  }
-  requestAnimationFrame(stepSpin);
-}
-
-/* Calcula quem saiu e mostra o par fixo, além de remover da lista */
-function finalizeSpin(){
-  // normaliza ângulo e encontra índice
-  const twoPi = Math.PI*2;
-  let normalized = (startAngle % twoPi + twoPi) % twoPi; // 0..2pi
-  // pointer está no topo ( -90deg ), então ajustamos com +pi/2
-  normalized = (twoPi - normalized + Math.PI/2) % twoPi;
-  const index = Math.floor(normalized / arc) % names.length;
-  const selected = names[index];
-
-  let message = "Sorteado: " + selected;
-  // se existir par fixo, mostrar e remover ambos
-  if(fixedPairs[selected]){
-    const partner = fixedPairs[selected];
-    message += "\\nDupla fixa: " + partner;
-    // remover ambos da lista (se existirem)
-    removeName(selected);
-    removeName(partner);
-  } else {
-    // remover só o selecionado
-    removeName(selected);
-  }
-
-  drawWheel();
-  document.getElementById("status").textContent = message;
-  alert(message);
-  if(names.length === 0){
-    document.getElementById("status").textContent = "Todos os alunos foram sorteados.";
-  } else {
-    document.getElementById("status").textContent += ` ${names.length} restante(s).`;
-  }
-}
-
-/* Remove pelo nome (tenta localizar exato) */
-function removeName(name){
-  const idx = names.findIndex(n => n === name);
-  if(idx !== -1){
-    names.splice(idx,1);
-    // recalcula arco
-    if(names.length > 0) arc = Math.PI*2 / names.length;
-  }
-}
-
-/* Reinicia a lista (volta ao backup) */
-function resetList(){
-  names = backupNames.slice();
-  arc = names.length ? Math.PI*2 / names.length : 0;
-  startAngle = 0;
-  drawWheel();
-  document.getElementById("status").textContent = `Lista reiniciada com ${names.length} nomes.`;
-}
-
-/* Ativa a página */
-initDOM();
-</script>
-</body>
-</html>
+# Executar e imprimir o resultado (este é o sorteio recém-gerado)
+duplas_finais = gerar_duplas(alunos, duplas_fixas)
+print("Duplas sorteadas:")
+for i, dupla in enumerate(duplas_finais, 1):
+    print(f"Dupla {i}: {dupla}")
