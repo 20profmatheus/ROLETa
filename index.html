@@ -241,7 +241,7 @@ function spinWheel(){
     return;
   }
   // inicia velocidade aleatória
-  spinVelocity = (Math.random() * 18 + 14); // deg/frame approx (rads we'll convert)
+  spinVelocity = (Math.random() * 18 + 5); // deg/frame approx (rads we'll convert)
   spinAnimating = true;
   lastTimestamp = null;
   document.getElementById("status").textContent = "Girando...";
